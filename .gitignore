@@ -1,0 +1,5 @@
+.env
+*.whl
+*.tar
+*.tar.gz
+*.pyc

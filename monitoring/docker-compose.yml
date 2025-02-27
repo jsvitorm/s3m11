@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=senha_segura
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  exporter:
+    build:
+      context: ./exporter
+    container_name: supabase-exporter
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=https://oirfdryzwvccwkhoghfa.supabase.co
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pcmZkcnl6d3ZjY3draG9naGZhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTg3OTIyMSwiZXhwIjoyMDU1NDU1MjIxfQ.DWVi8UkuBIOezhW65D-P_5rcV3mfRJEg0CNQFNdL4eE
+      - SUPABASE_KEY_BOLADONA=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pcmZkcnl6d3ZjY3draG9naGZhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTg3OTIyMSwiZXhwIjoyMDU1NDU1MjIxfQ.DWVi8UkuBIOezhW65D-P_5rcV3mfRJEg0CNQFNdL4eE
+      - BUCKET_NAME=meubocketkkk
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:
